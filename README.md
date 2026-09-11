@@ -47,3 +47,37 @@ XGBoost Regressor gave the best performance among all models tested, with a smal
 ## Tools Used
 
 Python, Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn, XGBoost
+
+## 🚀 FastAPI
+
+The trained XGBoost model was deployed using FastAPI.
+
+### POST /predict
+
+The API takes cab booking information as JSON and returns the predicted number of bookings.
+
+Example input:
+{
+  "season": "Summer",
+  "holiday": 0,
+  "workingday": 1,
+  "weather": "Clear + Few clouds",
+  "temp": 25,
+  "humidity": 60,
+  "windspeed": 10,
+  "year": 2025,
+  "month": 8,
+  "day": 15,
+  "hour": 18
+}
+
+Example response:
+{
+  "predicted_bookings": 245.67
+}
+
+### How it works
+
+Input → Validation → Encoding → Scaling → XGBoost → Prediction → JSON Response
+
+The API uses the same saved encoders and scaler used during model training.
