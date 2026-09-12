@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# Load the trained model, scaler, and encoders.
 model = joblib.load('xgb_cab_booking_model.joblib')
 scaler = joblib.load('scaler.joblib')
 season_enc = joblib.load('season_encoder.joblib')
@@ -17,14 +18,14 @@ SCALER_COLUMNS = ['season', 'holiday', 'workingday', 'weather', 'temp',
 
 
 def scale_value(column_name, value):
-    # StandardScaler formula manually laga rahe hain ek column ke liye:
-    # scaled = (value - mean) / std_deviation ye formula hai
+    # We are manually applying the StandardScaler formula to a single column.
+    # scaled = (value - mean) / std_deviation this is the formula for standard scaling.
     idx = SCALER_COLUMNS.index(column_name)
     return (value - scaler.mean_[idx]) / scaler.scale_[idx]
 
 
 def unscale_prediction(scaled_value):
-    # Ulta formula - scaled prediction ko wapas real booking count mein laya jara:
+    #The inverse formula is bringing the scaled prediction back to the real booking count.
     idx = SCALER_COLUMNS.index('Bookings')
     return (scaled_value * scaler.scale_[idx]) + scaler.mean_[idx]
 
@@ -49,7 +50,7 @@ def predict_bookings(data: CabBookingInput):
     season_code = season_enc.transform([data.season])[0]
     weather_code = weather_enc.transform([data.weather])[0]
 
-    # 4. Har feature ko usi scale mein laaye jisme model train hua tha
+    # Bring each feature to the same scale as the model was trained on.
     input_df = pd.DataFrame([{
         'season': scale_value('season', season_code),
         'holiday': scale_value('holiday', data.holiday),
@@ -66,7 +67,7 @@ def predict_bookings(data: CabBookingInput):
 
     scaled_prediction = model.predict(input_df)[0]
 
-    # 5. Model ka output bhi scaled tha - ise real booking count mein convert kiya
+    # The model's output was also scaled, so I converted it back to the real booking count.
     real_prediction = unscale_prediction(scaled_prediction)
 
     return {'predicted_bookings': round(float(real_prediction), 2)}
@@ -79,3 +80,4 @@ def index():
 
 if __name__ == '__main__':
     uvicorn.run(app, host='127.0.0.1', port=8000)
+# This file converts The Cab Booking project into a prediction API using FastAPI.
