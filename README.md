@@ -84,15 +84,15 @@ The API uses the same saved encoders and scaler used during model training.
 
 ## 🗄️ MySQL Logging
 
-Every /predict call is logged to a MySQL database for tracking and history.
+Every `/predict` call is logged to a MySQL database for tracking and history.
 
-- *db.py* — handles the database connection (host, user, password, database name).
-- *predictions table* — stores each request's input features along with the predicted booking count and a timestamp.
-- Credentials are kept in a .env file (not committed to GitHub) and loaded via python-dotenv; the connection uses parameterized queries (%s placeholders) to prevent SQL injection.
+- **db.py** — handles the database connection (host, user, password, database name).
+- **predictions table** — stores each request's input features along with the predicted booking count and a timestamp.
+- Credentials are kept in a `.env` file (not committed to GitHub) and loaded via `python-dotenv`; the connection uses parameterized queries (`%s` placeholders) to prevent SQL injection.
 
-*Flow:* /predict request → prediction generated → input + output saved to predictions table via INSERT query → conn.commit().
+**Flow:** `/predict` request → prediction generated → input + output saved to `predictions` table via `INSERT` query → `conn.commit()`.
 
-\\\`sql
+\`\`\`sql
 CREATE TABLE predictions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     season VARCHAR(50),
@@ -109,4 +109,4 @@ CREATE TABLE predictions (
     predicted_bookings FLOAT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-\\\`
+\`\`\`
