@@ -23,12 +23,12 @@ Cab booking companies can improve service efficiency and reduce customer wait ti
 
 ## Approach
 
-1. *EDA* — Analyzed booking trends by hour, season, weather, temperature, humidity, and windspeed to understand demand patterns.
-2. *Preprocessing* — Extracted year/month/day/hour from datetime, encoded categorical features, capped outliers, and removed invalid holiday/workingday combinations.
-3. *Feature Scaling* — Applied StandardScaler, fitting only on training data and transforming the test set separately to avoid data leakage.
-4. *Model Comparison* — Evaluated 8 regression models (Linear Regression, Ridge, Lasso, KNN, Decision Tree, Random Forest, Gradient Boosting, AdaBoost, XGBoost) using 5-Fold Cross Validation.
-5. *Hyperparameter Tuning* — Used GridSearchCV to tune XGBoost, then diagnosed overfitting by comparing train vs. test RMSE (not just relying on CV score).
-6. *Fix* — Reduced model complexity and increased regularization to close the train-test gap.
+1. EDA — Analyzed booking trends by hour, season, weather, temperature, humidity, and windspeed to understand demand patterns.
+2. Preprocessing — Extracted year/month/day/hour from datetime, encoded categorical features, capped outliers, and removed invalid holiday/workingday combinations.
+3. Feature Scaling — Applied StandardScaler, fitting only on training data and transforming the test set separately to avoid data leakage.
+4. Model Comparison — Evaluated 8 regression models (Linear Regression, Ridge, Lasso, KNN, Decision Tree, Random Forest, Gradient Boosting, AdaBoost, XGBoost) using 5-Fold Cross Validation.
+5. Hyperparameter Tuning — Used GridSearchCV to tune XGBoost, then diagnosed overfitting by comparing train vs. test RMSE (not just relying on CV score).
+6. Fix — Reduced model complexity and increased regularization to close the train-test gap.
 
 ## Results
 
@@ -82,13 +82,17 @@ Input → Validation → Encoding → Scaling → XGBoost → Prediction → JSO
 
 The API uses the same saved encoders and scaler used during model training.
 
-## 🗄 MySQL Logging
-Every /predict call is logged to a MySQL database for tracking and history.
-db.py — handles the database connection (host, user, password, database name).
-predictions table — stores each request's input features along with the predicted booking count and a timestamp.
-Credentials are kept in a .env file (not committed to GitHub) and loaded via python-dotenv; the connection uses parameterized queries (%s placeholders) to prevent SQL injection.
-Flow: /predict request → prediction generated → input + output saved to predictions table via INSERT query → conn.commit().
+## 🗄️ MySQL Logging
 
+Every /predict call is logged to a MySQL database for tracking and history.
+
+- *db.py* — handles the database connection (host, user, password, database name).
+- *predictions table* — stores each request's input features along with the predicted booking count and a timestamp.
+- Credentials are kept in a .env file (not committed to GitHub) and loaded via python-dotenv; the connection uses parameterized queries (%s placeholders) to prevent SQL injection.
+
+*Flow:* /predict request → prediction generated → input + output saved to predictions table via INSERT query → conn.commit().
+
+\\\`sql
 CREATE TABLE predictions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     season VARCHAR(50),
@@ -105,3 +109,4 @@ CREATE TABLE predictions (
     predicted_bookings FLOAT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+\\\`
