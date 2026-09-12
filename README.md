@@ -92,7 +92,7 @@ Every `/predict` call is logged to a MySQL database for tracking and history.
 
 **Flow:** `/predict` request → prediction generated → input + output saved to `predictions` table via `INSERT` query → `conn.commit()`.
 
-\`\`\`sql
+```sql
 CREATE TABLE predictions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     season VARCHAR(50),
@@ -109,4 +109,4 @@ CREATE TABLE predictions (
     predicted_bookings FLOAT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-\`\`\`
+```
