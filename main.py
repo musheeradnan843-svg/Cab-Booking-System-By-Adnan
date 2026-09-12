@@ -3,6 +3,7 @@ import pandas as pd
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+from db import get_connection
 
 app = FastAPI()
 
@@ -66,10 +67,24 @@ def predict_bookings(data: CabBookingInput):
     }])
 
     scaled_prediction = model.predict(input_df)[0]
-
-    # The model's output was also scaled, so I converted it back to the real booking count.
     real_prediction = unscale_prediction(scaled_prediction)
 
+    # Save this prediction to MySQL for history/tracking purposes.
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    insert_query = """
+        INSERT INTO predictions (season, holiday, workingday, weather, temp, humidity, windspeed, year, month, day, hour, predicted_bookings)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    """
+    values = (data.season, data.holiday, data.workingday, data.weather, data.temp, data.humidity, data.windspeed, data.year, data.month, data.day, data.hour, round(float(real_prediction), 2))
+
+    cursor.execute(insert_query, values)   # %s = safe from sql injection.
+    conn.commit()    # actually saves the data.
+    cursor.close()
+    conn.close()
+
+    # The model's output was also scaled, so I converted it back to the real booking count.
     return {'predicted_bookings': round(float(real_prediction), 2)}
 
 
